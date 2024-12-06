@@ -3,6 +3,7 @@ name = "currency-converter"
 version = "0.1.0"
 description = ""
 authors = ["Stepan Piskunov st-psk@mail.ru"]
+readme="README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -20,6 +21,7 @@ uvicorn = "^0.32.1"
 matplotlib = "^3.9.3"
 pandas = "^2.2.3"
 aiofiles = "^24.1.0"
+dadata = "^24.10.0"
 
 
 [build-system]

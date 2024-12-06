@@ -48,7 +48,7 @@ class PostgresContext[PostgresCRUD]:
                 await session.execute(text('SELECT 1'))
             logger.info("Connection to PostgreSQL is successful!")
         except Exception as e:
-            logger.error(f"Connection to PostgreSQL failed: {e.__class__.__name__} - {e}")
+            logger.critical(f"Connection to PostgreSQL failed: {e.__class__.__name__} - {e}")
             raise ConnectionError("Connection to PostgreSQL failed!")
 
     def __init__(self, *,

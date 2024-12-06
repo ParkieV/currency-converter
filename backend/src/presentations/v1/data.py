@@ -7,6 +7,7 @@ from starlette.responses import StreamingResponse
 from src.logger import logger
 from src.repositories.postgres import PostgresContext, CurrenciesCRUD
 from src.services.currencies import convert_currencies, get_currency_dynamics, draw_dynamics_graphic
+from src.services.parsers import Parser
 from src.services.utils import read_file_by_chunks
 
 router = APIRouter()
@@ -60,3 +61,9 @@ async def get_dynamics(date_start: str = Query(...),
     tmpfile_path = await asyncio.to_thread(draw_dynamics_graphic, dynamics_data)
 
     return StreamingResponse(read_file_by_chunks(tmpfile_path), media_type="image/png")
+
+@router.get('/search-country-currency-info')
+async def get_countries_info(country: str = Query(...)) -> list[dict]:
+    """ Поиск информации о валюте по стране """
+    parser = Parser()
+    return await parser.get_country_data(country)

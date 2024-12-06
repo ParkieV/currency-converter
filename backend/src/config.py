@@ -20,4 +20,10 @@ class DBConfig(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix='DB_', extra="allow")
 
+class DadataConfig(BaseSettings):
+    api_token: str
+
+    model_config = SettingsConfigDict(env_prefix='DADATA_', extra="allow")
+
 db_config = DBConfig()
+dadata_config = DadataConfig()

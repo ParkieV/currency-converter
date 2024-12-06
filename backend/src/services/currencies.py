@@ -1,16 +1,15 @@
-from datetime import date
-from io import BytesIO
 from pathlib import Path
+from datetime import date
 from tempfile import NamedTemporaryFile
 
-import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from src.logger import logger
 from src.repositories.postgres import PostgresContext
-from src.repositories.postgres.data import CurrenciesCRUD
 from src.schemas.data_schemas import CurrencyDinamicDTO
-from src.services.parsers.cbr_parser import CBRParser
+from src.repositories.postgres.data import CurrenciesCRUD
+from src.services.parsers import Parser
 
 
 async def convert_currencies(from_code: str,
@@ -55,11 +54,12 @@ async def get_currency_dynamics(curr_symbol: str,
                 dynamics = data
             )
         else:
+            parser = Parser()
             resp_model = CurrencyDinamicDTO(
                 name=curr_data.name,
                 char_code=curr_data.char_code,
                 cdr_id = curr_data.cdr_id,
-                dynamics = await CBRParser.get_curr_dynamic(curr_data.cdr_id, start_date, finish_date),
+                dynamics = await parser.cbr_parser.get_curr_dynamic(curr_data.cdr_id, start_date, finish_date),
             )
 
         return resp_model
