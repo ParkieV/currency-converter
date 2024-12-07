@@ -21,6 +21,7 @@ class DBConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix='DB_', extra="allow")
 
 class DadataConfig(BaseSettings):
+    """ Конфигурация для API Dadata """
     api_token: str
 
     model_config = SettingsConfigDict(env_prefix='DADATA_', extra="allow")

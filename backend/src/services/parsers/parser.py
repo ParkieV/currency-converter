@@ -52,8 +52,13 @@ class Parser:
                 logger.error(f"Can't save currencies on date {date_req}. {e.__class__.__name__}: {e}")
         logger.info(f'Parsed exchange rates for {date_req} successfully!')
 
-    async def get_country_data(self, country: str):
-        countries = await self.dadata_parser.fulltext_country_search(country)
+    async def get_gov_currency_data(self, country: str) -> list[dict[str, Any]]:
+        """
+        Метод для получения информации о государственной валюте указанной страны
+        :param country: Страна
+        :return: Информация о валюте
+        """
+        countries = await self.dadata_parser.fulltext_currency_search(country)
 
         for i, country in enumerate(countries):
             data = country.get('data')

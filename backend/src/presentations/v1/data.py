@@ -63,7 +63,7 @@ async def get_dynamics(date_start: str = Query(...),
     return StreamingResponse(read_file_by_chunks(tmpfile_path), media_type="image/png")
 
 @router.get('/search-country-currency-info')
-async def get_countries_info(country: str = Query(...)) -> list[dict]:
+async def get_country_currency_info(country: str = Query(...)) -> list[dict]:
     """ Поиск информации о валюте по стране """
     parser = Parser()
-    return await parser.get_country_data(country)
+    return await parser.get_gov_currency_data(country)
