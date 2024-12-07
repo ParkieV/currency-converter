@@ -5,9 +5,9 @@ from typing import Any
 from attrs import define
 
 from src.logger import logger
-from src.services.parsers.cbr_parser import CBRParser
 from src.repositories.postgres import PostgresContext
 from src.repositories.postgres.data import CurrenciesCRUD
+from src.services.parsers.cbr_parser import CBRParser
 from src.services.parsers.dadata_parser import DadataParser
 
 
@@ -33,15 +33,20 @@ class Parser:
 
         return self._dadata_parser
 
-    async def load_tomorrow_currencies(self, date_req: date = date.today() + timedelta(days=1)):
+    async def load_tomorrow_currencies(
+        self, date_req: date = date.today() + timedelta(days=1)
+    ):
         """Метод для загрузки данных о курсе рубля относительно других валют на указанный день"""
-        logger.info(f'Start parsing exchange rates for {date_req}')
+        logger.info(f"Start parsing exchange rates for {date_req}")
         currencies: list[dict[str, Any]] = []
         try:
-            currencies = [model.model_dump() for model in
-                      await self.cbr_parser.get_curr(date_req)]
+            currencies = [
+                model.model_dump() for model in await self.cbr_parser.get_curr(date_req)
+            ]
         except Exception as e:
-            logger.error(f"Cannot load currencies on date {date_req}. {e.__class__.__name__}: {e}")
+            logger.error(
+                f"Cannot load currencies on date {date_req}. {e.__class__.__name__}: {e}"
+            )
 
         if len(currencies) > 0:
             db_context = PostgresContext(crud=CurrenciesCRUD())
@@ -49,8 +54,10 @@ class Parser:
                 async with db_context.new_session() as session:
                     await db_context.crud.insert_objects(currencies, session=session)
             except Exception as e:
-                logger.error(f"Can't save currencies on date {date_req}. {e.__class__.__name__}: {e}")
-        logger.info(f'Parsed exchange rates for {date_req} successfully!')
+                logger.error(
+                    f"Can't save currencies on date {date_req}. {e.__class__.__name__}: {e}"
+                )
+        logger.info(f"Parsed exchange rates for {date_req} successfully!")
 
     async def get_gov_currency_data(self, country: str) -> list[dict[str, Any]]:
         """
@@ -61,25 +68,30 @@ class Parser:
         countries = await self.dadata_parser.fulltext_currency_search(country)
 
         for i, country in enumerate(countries):
-            data = country.get('data')
+            data = country.get("data")
             if data is None:
-                logger.info(f'Could not find country data for {i}')
+                logger.info(f"Could not find country data for {i}")
                 continue
 
-            curr_symbol = data.get('strcode')
+            curr_symbol = data.get("strcode")
 
             if curr_symbol is None:
-                logger.info(f'Could not find country currency symbol for {i}')
+                logger.info(f"Could not find country currency symbol for {i}")
                 continue
 
             db_context = PostgresContext(crud=CurrenciesCRUD())
             async with db_context.new_session() as session:
-                cdr_id = (await db_context.crud.get_currency_by_char_code(curr_symbol, session)).cdr_id
+                cdr_id = (
+                    await db_context.crud.get_currency_by_char_code(
+                        curr_symbol, session
+                    )
+                ).cdr_id
 
-            country['data']['cdr_id'] = cdr_id
+            country["data"]["cdr_id"] = cdr_id
 
         return countries
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = Parser()
     asyncio.run(parser.load_tomorrow_currencies())

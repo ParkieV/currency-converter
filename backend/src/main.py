@@ -13,10 +13,11 @@ async def lifespan(_: FastAPI):
     await db_context.check_connection()
     yield
 
+
 app = FastAPI(lifespan=lifespan, root_path="/api")
 app.add_middleware(
-    CORSMiddleware, #type: ignore
-    allow_origins=['*'],
+    CORSMiddleware,  # type: ignore
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,93 +1,118 @@
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from src.logger import logger
 from src.repositories.postgres import PostgresContext
-from src.schemas.data_schemas import CurrencyDinamicDTO
 from src.repositories.postgres.data import CurrenciesCRUD
+from src.schemas.data_schemas import CurrencyDinamicDTO
 from src.services.parsers import Parser
 
 
-async def convert_currencies(from_code: str,
-                         to_code: str,
-                         value: float):
-    """ Метод для конвертации валюты по курсу ЦБ"""
+async def convert_currencies(from_code: str, to_code: str, value: float):
+    """Метод для конвертации валюты по курсу ЦБ"""
     db_context = PostgresContext(crud=CurrenciesCRUD())
     from_data, to_data = None, None
     async with PostgresContext.new_session() as session:
         try:
-            from_data = await db_context.crud.get_currency_by_char_code(from_code, session)
+            from_data = await db_context.crud.get_currency_by_char_code(
+                from_code, session
+            )
         except Exception as e:
-            logger.error(f'Failed to obtain char code for the base currency. {e.__class__.__name__}: {e}')
+            logger.error(
+                f"Failed to obtain char code for the base currency. {e.__class__.__name__}: {e}"
+            )
             raise ValueError("Can't convert from base currency.")
 
         try:
             to_data = await db_context.crud.get_currency_by_char_code(to_code, session)
         except Exception as e:
-            logger.error(f'Failed to obtain char code for the target currency. {e.__class__.__name__}: {e}')
+            logger.error(
+                f"Failed to obtain char code for the target currency. {e.__class__.__name__}: {e}"
+            )
             raise ValueError("Can't convert to target currency.")
 
     return round(from_data.value / to_data.value * value, 4)
 
-async def get_currency_dynamics(curr_symbol: str,
-                               start_date: date,
-                               finish_date: date):
+
+async def get_currency_dynamics(curr_symbol: str, start_date: date, finish_date: date):
 
     db_context = PostgresContext(crud=CurrenciesCRUD())
     async with PostgresContext.new_session() as session:
         try:
-            curr_data = await db_context.crud.get_currency_by_char_code(curr_symbol, session)
+            curr_data = await db_context.crud.get_currency_by_char_code(
+                curr_symbol, session
+            )
         except Exception as e:
-            logger.error(f'Failed to obtain char code for the base currency. {e.__class__.__name__}: {e}')
+            logger.error(
+                f"Failed to obtain char code for the base currency. {e.__class__.__name__}: {e}"
+            )
             raise ValueError("Can't convert from base currency.")
 
         if await db_context.crud.check_date_in_db(start_date, session):
-            data = await db_context.crud.get_object_limit_date(start_date, finish_date, session)
+            data = await db_context.crud.get_object_limit_date(
+                start_date, finish_date, session
+            )
             resp_model = CurrencyDinamicDTO(
                 name=curr_data.name,
                 char_code=curr_data.char_code,
-                cdr_id = curr_data.cdr_id,
-                dynamics = data
+                cdr_id=curr_data.cdr_id,
+                dynamics=data,
             )
         else:
             parser = Parser()
             resp_model = CurrencyDinamicDTO(
                 name=curr_data.name,
                 char_code=curr_data.char_code,
-                cdr_id = curr_data.cdr_id,
-                dynamics = await parser.cbr_parser.get_curr_dynamic(curr_data.cdr_id, start_date, finish_date),
+                cdr_id=curr_data.cdr_id,
+                dynamics=await parser.cbr_parser.get_curr_dynamic(
+                    curr_data.cdr_id, start_date, finish_date
+                ),
             )
 
         return resp_model
 
+
 def draw_dynamics_graphic(currency_dinamics: CurrencyDinamicDTO) -> Path:
     df = pd.DataFrame([point.model_dump() for point in currency_dinamics.dynamics])
-    df['date_check'] = pd.to_datetime(df['date_check'], format='%Y-%m-%d')
-    df = df.sort_values('date_check')
+    df["date_check"] = pd.to_datetime(df["date_check"], format="%Y-%m-%d")
+    df = df.sort_values("date_check")
 
     plt.figure(figsize=(14, 7))
-    plt.plot(df['date_check'], df['unit_value'], marker='o', linestyle='-', color='blue', label='Курс USD к RUB')
+    plt.plot(
+        df["date_check"],
+        df["unit_value"],
+        marker="o",
+        linestyle="-",
+        color="blue",
+        label="Курс USD к RUB",
+    )
 
     title = f"{currency_dinamics.name} ({currency_dinamics.char_code})"
     if currency_dinamics.cdr_id:
         title += f", ID: {currency_dinamics.cdr_id}"
     plt.title(title, fontsize=16)
 
-    plt.xlabel('Дата', fontsize=14)
-    plt.ylabel('Курс к RUB', fontsize=14)
+    plt.xlabel("Дата", fontsize=14)
+    plt.ylabel("Курс к RUB", fontsize=14)
     plt.gcf().autofmt_xdate()
-    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend()
     for idx, row in df.iterrows():
-        plt.text(row['date_check'], row['unit_value'] + 0.02, f"{row['unit_value']:.4f}", fontsize=8, ha='center')
+        plt.text(
+            row["date_check"],
+            row["unit_value"] + 0.02,
+            f"{row['unit_value']:.4f}",
+            fontsize=8,
+            ha="center",
+        )
 
     # Сохранение графика в временный файл
-    with NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+    with NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
         plt.tight_layout()
-        plt.savefig(tmp_file.name, format='png')
+        plt.savefig(tmp_file.name, format="png")
         plt.close()
         return Path(tmp_file.name)

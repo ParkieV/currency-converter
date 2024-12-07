@@ -18,11 +18,13 @@ class CurrencyDTO(CustomBaseModel):
     unit_value: float
     data_check: date = Field(default_factory=date.today)
 
+
 class CurrencyDynamicPoint(BaseModel):
     nominal: int
     value: float
     unit_value: float
     date_check: date
+
 
 class CurrencyDinamicDTO(BaseModel):
     name: str

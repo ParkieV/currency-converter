@@ -18,13 +18,16 @@ class DBConfig(BaseSettings):
         logger.debug("DB URL: %s", db_url)
         return db_url
 
-    model_config = SettingsConfigDict(env_prefix='DB_', extra="allow")
+    model_config = SettingsConfigDict(env_prefix="DB_", extra="allow")
+
 
 class DadataConfig(BaseSettings):
-    """ Конфигурация для API Dadata """
+    """Конфигурация для API Dadata"""
+
     api_token: str
 
-    model_config = SettingsConfigDict(env_prefix='DADATA_', extra="allow")
+    model_config = SettingsConfigDict(env_prefix="DADATA_", extra="allow")
+
 
 db_config = DBConfig()
 dadata_config = DadataConfig()

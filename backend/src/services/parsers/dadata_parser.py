@@ -4,8 +4,9 @@ from dadata.asynchr import DadataClient
 
 from src.config import dadata_config
 
+
 class DadataParser:
-    """ Класс для парсинга данных через DaData API """
+    """Класс для парсинга данных через DaData API"""
 
     # Клиент для взаимодействия с API Dadata
     client: DadataClient = DadataClient(dadata_config.api_token)
