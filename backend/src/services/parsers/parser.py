@@ -14,10 +14,10 @@ from src.services.parsers.dadata_parser import DadataParser
 @define(kw_only=True)
 class Parser:
     #: Парсер cbr
-    _cbr_parser: CBRParser = CBRParser()
+    _cbr_parser: CBRParser | None = None
 
     #: Парсер Dadata
-    _dadata_parser: DadataParser = DadataParser()
+    _dadata_parser: DadataParser | None = None
 
     @property
     def cbr_parser(self) -> CBRParser:
@@ -80,12 +80,16 @@ class Parser:
                 continue
 
             db_context = PostgresContext(crud=CurrenciesCRUD())
-            async with db_context.new_session() as session:
-                cdr_id = (
-                    await db_context.crud.get_currency_by_char_code(
-                        curr_symbol, session
-                    )
-                ).cdr_id
+            try:
+                async with db_context.new_session() as session:
+                    cdr_id = (
+                        await db_context.crud.get_currency_by_char_code(
+                            curr_symbol, session
+                        )
+                    ).cdr_id
+            except Exception:
+                logger.debug(f"Could not find currency with char code '{curr_symbol}'.")
+                cdr_id = None
 
             country["data"]["cdr_id"] = cdr_id
 
@@ -93,5 +97,5 @@ class Parser:
 
 
 if __name__ == "__main__":
-    parser = Parser()
+    parser = Parser(cbr_parser=CBRParser())
     asyncio.run(parser.load_tomorrow_currencies())

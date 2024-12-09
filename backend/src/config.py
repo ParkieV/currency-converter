@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -27,7 +29,6 @@ class DadataConfig(BaseSettings):
     api_token: str
 
     model_config = SettingsConfigDict(env_prefix="DADATA_", extra="allow")
-
 
 db_config = DBConfig()
 dadata_config = DadataConfig()
