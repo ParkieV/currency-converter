@@ -24,6 +24,7 @@ aiofiles = {extras = ["types-aiofiles"], version = "^24.1.0"}
 dadata = "^24.10.0"
 fastapi-keycloak = "^1.0.11"
 schedule = "^1.2.2"
+attrs = "^24.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
