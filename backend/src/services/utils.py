@@ -84,6 +84,7 @@ async def read_file_by_chunks(
     finally:
         os.remove(file_path)
 
+
 def find_nth_occurrence(text, char, n):
     """
     Метод для возврата индекса искомого символа в строке по его номеру повтора

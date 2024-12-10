@@ -7,6 +7,7 @@ from src.config import keycloak_openid
 from src.presentations.api import router
 from src.repositories.postgres import PostgresContext
 
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     db_context = PostgresContext()

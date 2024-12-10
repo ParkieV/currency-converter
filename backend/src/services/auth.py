@@ -5,20 +5,23 @@ from fastapi_keycloak import FastAPIKeycloak
 
 from src.services.utils import find_nth_occurrence
 
+
 # Доработка класса для использования в докер контейнере
 class CustomKeycloakAPI(FastAPIKeycloak):
 
-    def __init__(self,
-            server_url: str,
-            client_id: str,
-            client_secret: str,
-            realm: str,
-            admin_client_secret: str,
-            callback_uri: str,
-            server_public_url: str | None = None,
-            admin_client_id: str = "admin-cli",
-            scope: str = "openid profile email",
-            timeout: int = 10):
+    def __init__(
+        self,
+        server_url: str,
+        client_id: str,
+        client_secret: str,
+        realm: str,
+        admin_client_secret: str,
+        callback_uri: str,
+        server_public_url: str | None = None,
+        admin_client_id: str = "admin-cli",
+        scope: str = "openid profile email",
+        timeout: int = 10,
+    ):
         # Получение аргументов функции
         kwargs = locals()
         kwargs.pop("server_public_url")
@@ -39,6 +42,9 @@ class CustomKeycloakAPI(FastAPIKeycloak):
             OAuth2PasswordBearer: Auth scheme for swagger
         """
         try:
-            return OAuth2PasswordBearer(tokenUrl=self.server_public_url + self.token_uri[find_nth_occurrence(self.token_uri, '/', 3)+1:])
-        except:
+            return OAuth2PasswordBearer(
+                tokenUrl=self.server_public_url
+                + self.token_uri[find_nth_occurrence(self.token_uri, "/", 3) + 1 :]
+            )
+        except Exception:
             return OAuth2PasswordBearer(tokenUrl=self.token_uri)

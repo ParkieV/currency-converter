@@ -54,7 +54,9 @@ class CBRParser:
         return currencies
 
     @staticmethod
-    async def get_curr_dynamic(curr_code: str, start_date: date, finish_date: date) -> list[CurrencyDynamicPoint]:
+    async def get_curr_dynamic(
+        curr_code: str, start_date: date, finish_date: date
+    ) -> list[CurrencyDynamicPoint]:
         """
         Получение данных об изменении валюты
 

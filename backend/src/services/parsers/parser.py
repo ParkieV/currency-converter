@@ -21,7 +21,7 @@ class Parser:
 
     @property
     def cbr_parser(self) -> CBRParser:
-        """ Геттер класса `CBRParser` """
+        """Геттер класса `CBRParser`"""
         if self._cbr_parser is None:
             raise ValueError("CBR parser not initialized")
 
@@ -29,7 +29,7 @@ class Parser:
 
     @property
     def dadata_parser(self) -> DadataParser:
-        """ Геттер класса `DadataParser` """
+        """Геттер класса `DadataParser`"""
         if self._dadata_parser is None:
             raise ValueError("Dadata parser not initialized")
 

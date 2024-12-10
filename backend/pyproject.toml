@@ -20,9 +20,10 @@ greenlet = "^3.1.1"
 uvicorn = "^0.32.1"
 matplotlib = "^3.9.3"
 pandas = "^2.2.3"
-aiofiles = "^24.1.0"
+aiofiles = {extras = ["types-aiofiles"], version = "^24.1.0"}
 dadata = "^24.10.0"
 fastapi-keycloak = "^1.0.11"
+schedule = "^1.2.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -32,6 +33,7 @@ isort = "^5.13.2"
 black = "^24.10.0"
 pytest-env = "^1.1.5"
 pytest-asyncio = "^0.24.0"
+mypy = "^1.13.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -8,7 +8,8 @@ from src.services.auth import CustomKeycloakAPI
 
 
 class DBConfig(BaseSettings):
-    """ Конфигурация БД """
+    """Конфигурация БД"""
+
     driver: str
     host: str
     port: int | None = Field(default=None)
@@ -33,9 +34,12 @@ class DadataConfig(BaseSettings):
 
 
 class KeycloakConfig(BaseSettings):
-    """ Конфигурация Keycloak """
-    server_url: str = Field(validation_alias='keycloak_uri')
-    server_public_url: str | None = Field(validation_alias='keycloak_public_uri', default=None)
+    """Конфигурация Keycloak"""
+
+    server_url: str = Field(validation_alias="keycloak_uri")
+    server_public_url: str | None = Field(
+        validation_alias="keycloak_public_uri", default=None
+    )
     client_id: str
     client_secret: str
     admin_secret: str
