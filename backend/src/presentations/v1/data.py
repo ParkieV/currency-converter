@@ -1,9 +1,11 @@
 import asyncio
 from datetime import date, datetime
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi_keycloak import OIDCUser
 from starlette.responses import StreamingResponse
 
+from src.config import keycloak_openid
 from src.logger import logger
 from src.repositories.postgres import CurrenciesCRUD, PostgresContext
 from src.services.currencies import (convert_currencies, draw_dynamics_graphic,
@@ -19,6 +21,7 @@ async def get_rates(
     symbol_from: str = Query(..., alias="from"),
     symbol_to: str = Query(..., alias="to"),
     value: float = Query(1.0),
+    user: OIDCUser = Depends(keycloak_openid.get_current_user())
 ):
     try:
         return {"result": await convert_currencies(symbol_from, symbol_to, value)}
@@ -36,7 +39,7 @@ async def get_rates(
 
 
 @router.get("/get-current-exchange-rate")
-async def get_current_exchange_rate():
+async def get_current_exchange_rate(user: OIDCUser = Depends(keycloak_openid.get_current_user())):
     db_context = PostgresContext(crud=CurrenciesCRUD())
     result = []
     async with db_context.new_session() as session:
@@ -56,6 +59,7 @@ async def get_dynamics(
     date_start: str = Query(...),
     date_end: str = Query(...),
     curr_symbol: str = Query(...),
+    user: OIDCUser = Depends(keycloak_openid.get_current_user())
 ):
     try:
         date_start = datetime.strptime(date_start, "%d/%m/%Y").date()
@@ -91,7 +95,8 @@ async def get_dynamics(
 
 
 @router.get("/search-country-currency-info")
-async def get_country_currency_info(country: str = Query(...)) -> list[dict]:
+async def get_country_currency_info(country: str = Query(...),
+                                    user: OIDCUser = Depends(keycloak_openid.get_current_user())) -> list[dict]:
     """Поиск информации о валюте по стране"""
     parser = Parser()
     return await parser.get_gov_currency_data(country)

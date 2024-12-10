@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from src.config import keycloak_openid
 from src.presentations.v1 import v1_router
 
 router = APIRouter()

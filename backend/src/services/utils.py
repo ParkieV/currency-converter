@@ -64,3 +64,11 @@ async def read_file_by_chunks(
         raise
     finally:
         os.remove(file_path)
+
+def find_nth_occurrence(text, char, n):
+    index = -1
+    for _ in range(n):
+        index = text.find(char, index + 1)
+        if index == -1:
+            return ValueError(f"Symbol '{char}' not found")
+    return index

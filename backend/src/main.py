@@ -1,11 +1,13 @@
+import time
 from contextlib import asynccontextmanager
 
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config import keycloak_openid
 from src.presentations.api import router
 from src.repositories.postgres import PostgresContext
-
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -22,4 +24,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+keycloak_openid.add_swagger_config(app)
 app.include_router(router)
