@@ -1,18 +1,15 @@
 import asyncio
 from datetime import date, datetime
 
-from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi_keycloak import OIDCUser
 from starlette.responses import StreamingResponse
 
 from src.config import keycloak_openid
 from src.logger import logger
 from src.repositories.postgres import CurrenciesCRUD, PostgresContext
-from src.services.currencies import (
-    convert_currencies,
-    draw_dynamics_graphic,
-    get_currency_dynamics,
-)
+from src.services.currencies import (convert_currencies, draw_dynamics_graphic,
+                                     get_currency_dynamics)
 from src.services.parsers import Parser
 from src.services.utils import read_file_by_chunks
 

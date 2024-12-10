@@ -46,6 +46,15 @@ services:
       database:
         condition: service_healthy
 
+
+  parser:
+    build:
+      context: backend
+      dockerfile: parser.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+
   keycloak:
     image: quay.io/keycloak/keycloak
     env_file: .env
@@ -81,8 +90,10 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
-      - keycloak
+      backend:
+        condition: service_started
+      keycloak:
+        condition: service_started
 
 volumes:
   db_data:

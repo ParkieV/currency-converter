@@ -3,12 +3,8 @@ from contextlib import asynccontextmanager
 from typing import TypeVar
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
+                                    async_sessionmaker, create_async_engine)
 
 from src.config import db_config
 from src.logger import logger

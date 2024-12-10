@@ -1,16 +1,7 @@
-import schedule
-import time
-import os
+from src.services.parsers.cbr_parser import CBRParser
+from src.services.parsers.parser import Parser
 
 
-def run_container():
-    os.system("docker run --rm my_container")
-
-
-# Запланировать запуск в 20:00
-schedule.every().day.at("20:00").do(run_container)
-
-# Запуск бесконечного цикла
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+if __name__ == "__main__":
+    parser = Parser(cbr_parser=CBRParser())
+    parser.load_tomorrow_currencies()
