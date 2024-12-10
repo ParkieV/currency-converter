@@ -36,6 +36,7 @@ class CBRParser:
                 value=1,
                 name="Российский рубль",
                 unit_value=1,
+                data_check=date_req
             )
         ]
         for valute in data:
@@ -48,6 +49,7 @@ class CBRParser:
                     value=float(valute.find("Value").text.replace(",", ".")),
                     name=valute.find("Name").text,
                     unit_value=float(valute.find("VunitRate").text.replace(",", ".")),
+                    data_check=date_req
                 )
             )
 

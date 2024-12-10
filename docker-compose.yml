@@ -19,21 +19,6 @@ services:
       timeout: 3s
       retries: 2
 
-  inmemory_db:
-    image: redis:latest
-    restart: unless-stopped
-    env_file: .env
-    command: /bin/sh -c "redis-server --requirepass $${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 2
-    volumes:
-      - inmemory_db_data:/var/lib/redis/data
-    ports:
-      - ${REDIS_PORT}:6379
-
   backend:
     restart: unless-stopped
     build:
@@ -45,7 +30,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-
 
   parser:
     env_file: .env

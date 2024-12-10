@@ -55,6 +55,7 @@ class Parser:
             logger.error(
                 f"Cannot load currencies on date {date_req}. {e.__class__.__name__}: {e}"
             )
+            raise
 
         if len(currencies) > 0:
             db_context = PostgresContext(crud=CurrenciesCRUD())
@@ -65,6 +66,8 @@ class Parser:
                 logger.error(
                     f"Can't save currencies on date {date_req}. {e.__class__.__name__}: {e}"
                 )
+                raise
+
         logger.info(f"Parsed exchange rates for {date_req} successfully!")
 
     async def get_gov_currency_data(self, country: str) -> list[dict[str, Any]]:
@@ -108,4 +111,7 @@ class Parser:
 
 if __name__ == "__main__":
     parser = Parser(cbr_parser=CBRParser())
-    asyncio.run(parser.load_tomorrow_currencies())
+    try:
+        asyncio.run(parser.load_tomorrow_currencies())
+    except Exception as e:
+        logger.error(f'Failed to load currencies. {e.__class__.__name__}: {e}')

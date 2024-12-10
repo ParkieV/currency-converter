@@ -8,6 +8,7 @@ from starlette.responses import StreamingResponse
 from src.config import keycloak_openid
 from src.logger import logger
 from src.repositories.postgres import CurrenciesCRUD, PostgresContext
+from src.schemas.data_schemas import CurrencyDTO
 from src.services.currencies import (convert_currencies, draw_dynamics_graphic,
                                      get_currency_dynamics)
 from src.services.parsers import Parser
@@ -42,10 +43,9 @@ async def get_rates(
 @router.get("/get-current-exchange-rate")
 async def get_current_exchange_rate(
     user: OIDCUser = Depends(keycloak_openid.get_current_user()),
-) -> list[CurrenciesCRUD]:
+) -> list[CurrencyDTO]:
     """Эндпоинт для получения курса валют на сегодня от ЦБ"""
     db_context = PostgresContext(crud=CurrenciesCRUD())
-    result = []
     async with db_context.new_session() as session:
         result = await db_context.crud.get_exchange_rates(date.today(), session)
 
@@ -60,8 +60,8 @@ async def get_current_exchange_rate(
 
 @router.get("/get-currency-dynamics")
 async def get_dynamics(
-    date_start: str = Query(...),
-    date_end: str = Query(...),
+    date_start: str = Query(..., example='01/01/2002'),
+    date_end: str = Query(..., example='01/03/2002'),
     curr_symbol: str = Query(...),
     user: OIDCUser = Depends(keycloak_openid.get_current_user()),
 ) -> StreamingResponse:
@@ -91,8 +91,11 @@ async def get_dynamics(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect dates"
         )
-
-    dynamics_data = await get_currency_dynamics(curr_symbol, date_start, date_end)
+    try:
+        dynamics_data = await get_currency_dynamics(curr_symbol, date_start, date_end)
+    except Exception as e:
+        logger.error(f'Failed to get dynamics data for {curr_symbol}. {e.__class__.__name__}: {e}')
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Can't get dynamics data")
 
     tmpfile_path = await asyncio.to_thread(draw_dynamics_graphic, dynamics_data)
 
