@@ -12,6 +12,7 @@ from src.schemas.data_schemas import CurrencyDTO
 from src.services.currencies import (convert_currencies, draw_dynamics_graphic,
                                      get_currency_dynamics)
 from src.services.parsers import Parser
+from src.services.parsers.dadata_parser import DadataParser
 from src.services.utils import read_file_by_chunks
 
 router = APIRouter()
@@ -108,5 +109,5 @@ async def get_country_currency_info(
     user: OIDCUser = Depends(keycloak_openid.get_current_user()),
 ) -> list[dict]:
     """Поиск информации о валюте по стране"""
-    parser = Parser()
+    parser = Parser(dadata_parser=DadataParser())
     return await parser.get_gov_currency_data(country)

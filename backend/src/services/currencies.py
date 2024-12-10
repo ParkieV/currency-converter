@@ -10,6 +10,7 @@ from src.repositories.postgres import PostgresContext
 from src.repositories.postgres.data import CurrenciesCRUD
 from src.schemas.data_schemas import CurrencyDinamicDTO
 from src.services.parsers import Parser
+from src.services.parsers.cbr_parser import CBRParser
 
 
 async def convert_currencies(from_code: str, to_code: str, value: float):
@@ -80,7 +81,7 @@ async def get_currency_dynamics(curr_symbol: str, start_date: date, finish_date:
                 dynamics=data,
             )
         else:
-            parser = Parser()
+            parser = Parser(cbr_parser=CBRParser())
             resp_model = CurrencyDinamicDTO(
                 name=curr_data.name,
                 char_code=curr_data.char_code,
