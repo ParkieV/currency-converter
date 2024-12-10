@@ -5,7 +5,7 @@ from fastapi_keycloak import FastAPIKeycloak
 
 from src.services.utils import find_nth_occurrence
 
-
+# Доработка класса для использования в докер контейнере
 class CustomKeycloakAPI(FastAPIKeycloak):
 
     def __init__(self,

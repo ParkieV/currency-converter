@@ -21,6 +21,7 @@ class Parser:
 
     @property
     def cbr_parser(self) -> CBRParser:
+        """ Геттер класса `CBRParser` """
         if self._cbr_parser is None:
             raise ValueError("CBR parser not initialized")
 
@@ -28,6 +29,7 @@ class Parser:
 
     @property
     def dadata_parser(self) -> DadataParser:
+        """ Геттер класса `DadataParser` """
         if self._dadata_parser is None:
             raise ValueError("Dadata parser not initialized")
 
@@ -35,8 +37,14 @@ class Parser:
 
     async def load_tomorrow_currencies(
         self, date_req: date = date.today() + timedelta(days=1)
-    ):
-        """Метод для загрузки данных о курсе рубля относительно других валют на указанный день"""
+    ) -> None:
+        """
+        Метод для загрузки данных о курсе рубля относительно других валют на указанный день
+
+        :param date_req: за какую дату необходимо получить данные
+
+        :return: данные о курсе валют за указанный день
+        """
         logger.info(f"Start parsing exchange rates for {date_req}")
         currencies: list[dict[str, Any]] = []
         try:
@@ -62,8 +70,10 @@ class Parser:
     async def get_gov_currency_data(self, country: str) -> list[dict[str, Any]]:
         """
         Метод для получения информации о государственной валюте указанной страны
-        :param country: Страна
-        :return: Информация о валюте
+
+        :param country: страна
+
+        :return: информация о валюте
         """
         countries = await self.dadata_parser.fulltext_currency_search(country)
 

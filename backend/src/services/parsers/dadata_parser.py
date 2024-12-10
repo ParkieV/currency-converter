@@ -14,7 +14,9 @@ class DadataParser:
     async def fulltext_currency_search(self, country: str) -> list[dict[str, Any]]:
         """
         Метод для получения данных о государственной валюте страны через API DaData
+
         :param country: Страна
+
         :return: Данные о валюте
         """
 

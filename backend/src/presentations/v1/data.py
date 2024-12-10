@@ -21,8 +21,8 @@ async def get_rates(
     symbol_from: str = Query(..., alias="from"),
     symbol_to: str = Query(..., alias="to"),
     value: float = Query(1.0),
-    user: OIDCUser = Depends(keycloak_openid.get_current_user())
-):
+    user: OIDCUser = Depends(keycloak_openid.get_current_user())) -> dict[str, float]:
+    """ Эндпоинт для конвертации валюты """
     try:
         return {"result": await convert_currencies(symbol_from, symbol_to, value)}
     except ValueError as e:
@@ -39,7 +39,8 @@ async def get_rates(
 
 
 @router.get("/get-current-exchange-rate")
-async def get_current_exchange_rate(user: OIDCUser = Depends(keycloak_openid.get_current_user())):
+async def get_current_exchange_rate(user: OIDCUser = Depends(keycloak_openid.get_current_user())) ->list[CurrenciesCRUD]:
+    """ Эндпоинт для получения курса валют на сегодня от ЦБ """
     db_context = PostgresContext(crud=CurrenciesCRUD())
     result = []
     async with db_context.new_session() as session:
@@ -60,7 +61,8 @@ async def get_dynamics(
     date_end: str = Query(...),
     curr_symbol: str = Query(...),
     user: OIDCUser = Depends(keycloak_openid.get_current_user())
-):
+) -> StreamingResponse:
+    """ Эндпоинт для получения графика изменения валюты в указанный промежуток """
     try:
         date_start = datetime.strptime(date_start, "%d/%m/%Y").date()
     except Exception as e:

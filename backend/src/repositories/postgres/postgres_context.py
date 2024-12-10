@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import TypeVar
 
@@ -32,18 +33,19 @@ class PostgresContext[PostgresCRUD]:
             raise ValueError("CRUD object has not been initialized")
 
     @crud.setter
-    def crud(self, crud: PostgresCRUD):
+    def crud(self, crud: PostgresCRUD) -> None:
         self._crud = crud
 
     @classmethod
     @asynccontextmanager
-    async def new_session(cls):
+    async def new_session(cls) -> AsyncGenerator[AsyncSession, None]:
         """Fabric to create new session with database"""
         async with cls._sessionmaker() as session:
             yield session
             await session.commit()
 
     async def check_connection(self):
+        """ Метод для проверки возможности подключиться к PostgreSQL """
         logger.info("Try to connect to PostgreSQL")
         try:
             async with self.new_session() as session:
@@ -60,7 +62,7 @@ class PostgresContext[PostgresCRUD]:
         *,
         engine: AsyncEngine | None = None,
         crud: PostgresCRUD | None = None,
-    ):
+    ) -> None:
         if engine:
             self.engine = engine
 

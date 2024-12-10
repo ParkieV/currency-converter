@@ -15,8 +15,8 @@ class CBRParser:
         """
         Метод для получения ставки по валютам за указанный день.
 
-        :param date_req: День, за который будут показаны котировки
-        :return: Список котировок за указанный день
+        :param date_req: день, за который будут показаны котировки
+        :return: список котировок за указанный день
         """
         async with aiohttp.ClientSession() as session:
             page_text = await fetch_url(
@@ -54,7 +54,16 @@ class CBRParser:
         return currencies
 
     @staticmethod
-    async def get_curr_dynamic(curr_code: str, start_date: date, finish_date: date):
+    async def get_curr_dynamic(curr_code: str, start_date: date, finish_date: date) -> list[CurrencyDynamicPoint]:
+        """
+        Получение данных об изменении валюты
+
+        :param curr_code: символьный код валюты
+        :param start_date: дата начала отслеживания
+        :param finish_date: дата конца отслеживания
+
+        :return: список данных о динамике валюты
+        """
 
         async with aiohttp.ClientSession() as session:
             page_data = await fetch_url(

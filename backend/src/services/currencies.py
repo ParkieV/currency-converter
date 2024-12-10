@@ -13,7 +13,15 @@ from src.services.parsers import Parser
 
 
 async def convert_currencies(from_code: str, to_code: str, value: float):
-    """Метод для конвертации валюты по курсу ЦБ"""
+    """
+    Метод для конвертации валюты по курсу ЦБ
+
+    :param from_code: кодовый символ начальной валюты
+    :param to_code: кодовый символ конечной валюты
+    :param value: количество валюты начальной валюты
+
+    :return: количество валюты конечной валюты
+    """
     db_context = PostgresContext(crud=CurrenciesCRUD())
     from_data, to_data = None, None
     async with PostgresContext.new_session() as session:
@@ -39,6 +47,15 @@ async def convert_currencies(from_code: str, to_code: str, value: float):
 
 
 async def get_currency_dynamics(curr_symbol: str, start_date: date, finish_date: date):
+    """
+    Получение динамики изменения валюты
+
+    :param curr_symbol: кодовый символ валюты
+    :param start_date: дата начала отслеживания
+    :param finish_date: дата конца отслеживания
+
+    :return: список данных о валюте
+    """
 
     db_context = PostgresContext(crud=CurrenciesCRUD())
     async with PostgresContext.new_session() as session:
@@ -52,9 +69,9 @@ async def get_currency_dynamics(curr_symbol: str, start_date: date, finish_date:
             )
             raise ValueError("Can't convert from base currency.")
 
-        if await db_context.crud.check_date_in_db(start_date, session):
+        if await db_context.crud.check_date_in_db(curr_symbol, start_date, session):
             data = await db_context.crud.get_object_limit_date(
-                start_date, finish_date, session
+                curr_symbol, start_date, finish_date, session
             )
             resp_model = CurrencyDinamicDTO(
                 name=curr_data.name,
@@ -77,6 +94,13 @@ async def get_currency_dynamics(curr_symbol: str, start_date: date, finish_date:
 
 
 def draw_dynamics_graphic(currency_dinamics: CurrencyDinamicDTO) -> Path:
+    """
+    Получение файла с графиком изменения валюты за указанный период
+
+    :param currency_dinamics: список данных о валюте
+
+    :return: Путь до временного файла с графиком
+    """
     df = pd.DataFrame([point.model_dump() for point in currency_dinamics.dynamics])
     df["date_check"] = pd.to_datetime(df["date_check"], format="%Y-%m-%d")
     df = df.sort_values("date_check")

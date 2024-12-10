@@ -17,6 +17,7 @@ class CurrenciesCRUD(BasePostgresCRUD):
     async def get_currency_by_char_code(
         self, char_code: str, session: AsyncSession
     ) -> CurrencyDTO:
+        """ Получение валюты по кодовому символу """
         try:
             query = (
                 select(self.model)
@@ -36,6 +37,7 @@ class CurrenciesCRUD(BasePostgresCRUD):
     async def get_exchange_rates(
         self, date_req: date, session: AsyncSession
     ) -> list[CurrencyDTO]:
+        """ Получение данных о курсе валют за указанный день """
         try:
             query = select(self.model).where(self.model.data_check == date_req)
             result = (await session.execute(query)).scalars().all()
@@ -50,11 +52,14 @@ class CurrenciesCRUD(BasePostgresCRUD):
 
         return [CurrencyDTO.model_validate(row, from_attributes=True) for row in result]
 
-    async def check_date_in_db(self, date_req: date, session: AsyncSession) -> bool:
+    async def check_date_in_db(self, curr_symbol: str, date_req: date, session: AsyncSession) -> bool:
         """Метод для проверки наличия данных в указанный день"""
         try:
             query = select(func.count(self.model.id)).filter(
-                self.model.data_check == date_req
+                and_(
+                    self.model.char_code == curr_symbol,
+                    self.model.data_check == date_req
+                )
             )
             result = (await session.execute(query)).scalar_one()
         except Exception as e:
@@ -66,11 +71,13 @@ class CurrenciesCRUD(BasePostgresCRUD):
         return result > 0
 
     async def get_object_limit_date(
-        self, date_left: date, date_right: date, session: AsyncSession
+        self, curr_symbol: str, date_left: date, date_right: date, session: AsyncSession
     ) -> list[CurrencyDTO]:
+        """ Получение данных по валюте в указанные данные """
         try:
             query = select(self.model).where(
                 and_(
+                    self.model.char_code == curr_symbol,
                     self.model.data_check >= date_left,
                     self.model.data_check <= date_right,
                 )
